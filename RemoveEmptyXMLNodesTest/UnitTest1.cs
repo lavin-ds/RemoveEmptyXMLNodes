@@ -8,7 +8,7 @@ namespace RemoveEmptyXMLNodesTest
         [Fact]
         public void Test1()
         {
-
+//Test
         }
     }
 }
