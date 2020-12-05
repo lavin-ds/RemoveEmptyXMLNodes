@@ -1,10 +1,5 @@
-﻿#region Namespaces
-
-using System.IO;
+﻿using System.IO;
 using System.Text;
-
-#endregion
-
 namespace RemoveEmptyXMLNodes
 {
     ///<summary>
