@@ -1,5 +1,10 @@
-﻿using System.IO;
+﻿#region
+
+using System.IO;
 using System.Text;
+
+#endregion
+
 namespace RemoveEmptyXMLNodes
 {
     ///<summary>
