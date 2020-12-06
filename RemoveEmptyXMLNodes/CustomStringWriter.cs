@@ -6,7 +6,7 @@ namespace RemoveEmptyXMLNodes
     ///String writer has been extended to skip empty nodes and not write them to the writer. Instead of the regular StringWriter
     ///when we pass CustomTextWriter to the XmlSerializer, the code does not create any nodes of type <abc /> or <abc></abc>
     ///</summary> 
-    public class CustomTextWriter : StringWriter
+    public class CustomStringWriter : StringWriter
     {
         ///<summary>
         ///The _node variable to hold the data in the buffer before writing to the base writer
