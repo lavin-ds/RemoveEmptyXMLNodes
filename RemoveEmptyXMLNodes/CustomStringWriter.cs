@@ -37,7 +37,7 @@ namespace RemoveEmptyXMLNodes
         {
             if(state == States.CloseBracketStarted && value == '<')
             {
-                _node.Append(value);
+                _node.Append(value);                
             }
 
             //Dont append '<' char to _node unless confirmed if data present
