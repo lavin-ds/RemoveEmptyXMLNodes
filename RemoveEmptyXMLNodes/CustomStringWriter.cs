@@ -11,7 +11,7 @@ namespace RemoveEmptyXMLNodes
     ///String writer has been extended to skip empty nodes and not write them to the writer. Instead of the regular StringWriter
     ///when we pass CustomTextWriter to the XmlSerializer, the code does not create any nodes of type <abc /> or <abc></abc>
     ///</summary> 
-    public class CustomTextWriter : StringWriter
+    public class CustomStringWriter : StringWriter
     {
         ///<summary>
         ///The _node variable to hold the data in the buffer before writing to the base writer
@@ -42,7 +42,7 @@ namespace RemoveEmptyXMLNodes
         {
             if(state == States.CloseBracketStarted && value == '<')
             {
-                _node.Append(value);
+                _node.Append(value);                
             }
 
             //Dont append '<' char to _node unless confirmed if data present
@@ -109,11 +109,19 @@ namespace RemoveEmptyXMLNodes
 
         public override void Write(char[] buffer)
         {
+            if (buffer.Length ==3 && buffer[0] == ' ' && buffer[1] == '/' && buffer[2] == '>' && state == States.NodeNameFound)
+            {
+                _node.Clear();
+                state = States.Initial;
+                return;
+            }
             _node.Append(buffer);
         }
 
         public override void Write(string value)
         {
+
+
             if(state == States.CloseBracketStarted)
             {
                 state = States.Initial;
