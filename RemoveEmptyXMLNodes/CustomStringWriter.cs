@@ -104,11 +104,19 @@ namespace RemoveEmptyXMLNodes
 
         public override void Write(char[] buffer)
         {
+            if (buffer.Length ==3 && buffer[0] == ' ' && buffer[1] == '/' && buffer[2] == '>' && state == States.NodeNameFound)
+            {
+                _node.Clear();
+                state = States.Initial;
+                return;
+            }
             _node.Append(buffer);
         }
 
         public override void Write(string value)
         {
+
+
             if(state == States.CloseBracketStarted)
             {
                 state = States.Initial;
