@@ -39,7 +39,9 @@ namespace RemoveEmptyXMLNodesTest
                 serializedCSWValue = csw.ToString();
             }
 
-            Assert.DoesNotContain("from", serializedCSWValue);
+            Assert.DoesNotContain("<from>", serializedCSWValue);
+            Assert.DoesNotContain("</from>", serializedCSWValue);
+            Assert.DoesNotContain("<from />", serializedCSWValue);
             Assert.Contains("from", serializedSWValue);
         }
 
@@ -73,8 +75,12 @@ namespace RemoveEmptyXMLNodesTest
                 serializedCSWValue = csw.ToString();
             }
 
-            Assert.DoesNotContain("from", serializedCSWValue);
-            Assert.DoesNotContain("heading", serializedCSWValue);
+            Assert.DoesNotContain("<from>", serializedCSWValue);
+            Assert.DoesNotContain("</from>", serializedCSWValue);
+            Assert.DoesNotContain("<heading>", serializedCSWValue);
+            Assert.DoesNotContain("</heading>", serializedCSWValue);
+            Assert.DoesNotContain("<from />", serializedCSWValue);
+            Assert.DoesNotContain("<heading />", serializedCSWValue);
             Assert.Contains("from", serializedSWValue);
             Assert.Contains("heading", serializedSWValue);
         }
@@ -109,10 +115,18 @@ namespace RemoveEmptyXMLNodesTest
                 serializedCSWValue = csw.ToString();
             }
 
-            Assert.DoesNotContain("from", serializedCSWValue);
-            Assert.DoesNotContain("heading", serializedCSWValue);
-            Assert.DoesNotContain("cc", serializedCSWValue);
-            Assert.DoesNotContain("bcc", serializedCSWValue);
+            Assert.DoesNotContain("<from>", serializedCSWValue);
+            Assert.DoesNotContain("</from>", serializedCSWValue);
+            Assert.DoesNotContain("<heading>", serializedCSWValue);
+            Assert.DoesNotContain("</heading>", serializedCSWValue);
+            Assert.DoesNotContain("<cc>", serializedCSWValue);
+            Assert.DoesNotContain("<bcc>", serializedCSWValue);
+            Assert.DoesNotContain("</cc>", serializedCSWValue);
+            Assert.DoesNotContain("</bcc>", serializedCSWValue);
+            Assert.DoesNotContain("<from />", serializedCSWValue);
+            Assert.DoesNotContain("<heading />", serializedCSWValue);
+            Assert.DoesNotContain("<cc />", serializedCSWValue);
+            Assert.DoesNotContain("<bcc />", serializedCSWValue);
             Assert.Contains("from", serializedSWValue);
             Assert.Contains("heading", serializedSWValue);
             Assert.Contains("cc", serializedSWValue);
