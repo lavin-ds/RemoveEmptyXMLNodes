@@ -11,7 +11,7 @@ namespace RemoveEmptyXMLNodes
     ///String writer has been extended to skip empty nodes and not write them to the writer. Instead of the regular StringWriter
     ///when we pass CustomTextWriter to the XmlSerializer, the code does not create any nodes of type <abc /> or <abc></abc>
     ///</summary> 
-    public class CustomTextWriter : StringWriter
+    public class CustomStringWriter : StringWriter
     {
         ///<summary>
         ///The _node variable to hold the data in the buffer before writing to the base writer
@@ -30,7 +30,7 @@ namespace RemoveEmptyXMLNodes
         {
             BackslashFoundInNodeWithData = -1, //S1M
             Initial = 0, //S0
-            OpenBracketStarted  = 1, //S1
+            OpenBracketStarted = 1, //S1
             NodeNameFound = 2, //S2
             BackslashFoundInNodeWithNoData = 4, //S4
             CloseBracketStarted = 5,//S5
@@ -40,116 +40,119 @@ namespace RemoveEmptyXMLNodes
 
         public override void Write(char value)
         {
-            if(state == States.CloseBracketStarted && value == '<')
-            {
-                _node.Append(value);
-            }
-
-            //Dont append '<' char to _node unless confirmed if data present
-            if(state != States.ClosingBracketForNodeWithData)
-            {
-                _node.Append(value);
-            }
-            else if(value!= '<')
-            {
-                _node.Append(value);
-            }
-
-            if(value == '<' && state == States.Initial)
-            {
-                state = States.OpenBracketStarted;
-            }
-
-            if(value == '<' && state == States.ClosingBracketForNodeWithData)
-            {
-                state = States.NextOpeningBracket;
-            }
-
-            if(value == '/' && state == States.NodeNameFound)
-            {
-                state = States.BackslashFoundInNodeWithNoData;
-            }
-
-            if(value == '/' && state == States.OpenBracketStarted)
-            {
-                state = States.BackslashFoundInNodeWithData;
-            }
-
-            if(value == '>' && state == States.BackslashFoundInNodeWithData)
-            {
-                base.Write(_node.ToString());
-                _node.Clear();
-                state = States.CloseBracketStarted;
-            }
-
-            if(value == '/' && state == States.NextOpeningBracket)
-            {
-                state = States.BackslashFoundInNodeWithNoData;
-            }
-
-            if(value == '>' && state == States.NodeNameFound)
-            {
-                state = States.ClosingBracketForNodeWithData;
-            }
-
-            if(value == '>' && state == States.BackslashFoundInNodeWithNoData)
-            {
-                //Node found without data
-                _node.Clear();
-                state = States.CloseBracketStarted;
-            }
-
-            if(state == States.Initial)
+            if (state == States.Initial)
             {
                 //If we are at initial state keep writing to the writer
                 base.Write(_node.ToString());
-                _node.Clear();   
+                _node.Clear();
             }
+
+            switch (value)
+            {
+                case '>':
+                    _node.Append(value);
+                    if (state == States.NodeNameFound)
+                    {
+                        state = States.ClosingBracketForNodeWithData;
+                    }
+                    //Node found without data
+                    if (state == States.BackslashFoundInNodeWithNoData)
+                    {
+                        _node.Clear();
+                        state = States.CloseBracketStarted;
+                    }           
+                    if (state == States.BackslashFoundInNodeWithData)
+                    {
+                        base.Write(_node.ToString());
+                        _node.Clear();
+                        state = States.CloseBracketStarted;
+                    }
+                    break;
+                case '/':
+                    _node.Append(value);
+                    if (state == States.NodeNameFound)
+                    {
+                        state = States.BackslashFoundInNodeWithNoData;
+                    }
+                    if (state == States.OpenBracketStarted)
+                    {
+                        state = States.BackslashFoundInNodeWithData;
+                    }
+                    if (state == States.NextOpeningBracket)
+                    {
+                        state = States.BackslashFoundInNodeWithNoData;
+                    }
+                    break;
+                case '<':
+                    if (state == States.Initial)
+                    {
+                        state = States.OpenBracketStarted;
+                    }
+                    if (state == States.ClosingBracketForNodeWithData)
+                    {
+                        state = States.NextOpeningBracket;
+                    }
+                    if (state == States.CloseBracketStarted)
+                    {
+                        _node.Append(value);
+                    }
+                    break;
+            }            
         }
 
         public override void Write(char[] buffer)
         {
+            if (buffer.Length == 3 && buffer[0] == ' ' && buffer[1] == '/' && buffer[2] == '>' && state == States.NodeNameFound)
+            {
+                _node.Clear();
+                state = States.Initial;
+                return;
+            }
             _node.Append(buffer);
         }
 
         public override void Write(string value)
         {
-            if(state == States.CloseBracketStarted)
+            switch (state)
             {
-                state = States.Initial;
-            }  
+                case States.CloseBracketStarted:
+                    _node.Append(value);
+                    state = States.Initial;
+                    base.Write(_node.ToString());
+                    _node.Clear();
+                    break;
 
-            if(state != States.NextOpeningBracket)
-            {
-                _node.Append(value);
-            }          
+                case States.OpenBracketStarted:
+                    _node.Append(value);
+                    state = States.NodeNameFound;
+                    break;
 
-            if(value == " /" && state == States.NodeNameFound)
-            {
-                state = States.BackslashFoundInNodeWithNoData;
-            }
+                case States.ClosingBracketForNodeWithData:
+                    _node.Append(value);
+                    state = States.Initial;
+                    break;
 
-            if(state == States.OpenBracketStarted)
-            {
-                state = States.NodeNameFound;
-            }
+                case States.NextOpeningBracket:
+                    base.Write(_node.ToString());
+                    _node.Clear();
+                    _node.Append('<');
+                    _node.Append(value);
+                    state = States.NodeNameFound;
+                    break;
 
-            if(state == States.ClosingBracketForNodeWithData)
-            {
-                state = States.Initial;
-            }
-            if(state == States.NextOpeningBracket)
-            {
-                base.Write(_node.ToString());
-                _node.Clear();
-                _node.Append('<');
-                _node.Append(value);
-                state = States.NodeNameFound;
-            }
-            if(state == States.Initial)
-            {
-                base.Write(_node.ToString());
-                _node.Clear();
+                case States.Initial:
+                    _node.Append(value);
+                    base.Write(_node.ToString());
+                    _node.Clear();
+                    break;
+
+                case States.NodeNameFound:
+                    _node.Append(value);
+                    if (value == " /")
+                    {
+                        state = States.BackslashFoundInNodeWithNoData;
+                    }
+                    break;
             }
         }
     }
